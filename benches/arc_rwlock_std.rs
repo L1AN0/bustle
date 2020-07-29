@@ -53,7 +53,7 @@ where
 
 fn main() {
     tracing_subscriber::fmt::init();
-    for n in 1..=num_cpus::get() {
+    for n in (1..=num_cpus::get()).step_by(num_cpus::get() / 4) {
         Workload::new(n, Mix::read_heavy()).run::<Table<u64>>();
     }
 }
