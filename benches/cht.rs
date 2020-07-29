@@ -1,16 +1,24 @@
 use bustle::*;
-use dashmapv4::DashMap;
+use cht::HashMap;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<DashMap<K, ()>>);
+struct Table<K>(std::sync::Arc<HashMap<K, ()>>);
 
 impl<K> Collection for Table<K>
 where
-    K: Send + Sync + From<u64> + Copy + 'static + std::hash::Hash + Eq + std::fmt::Debug,
+    K: Send
+        + Sync
+        + From<u64>
+        + Copy
+        + 'static
+        + std::hash::Hash
+        + Eq
+        + std::fmt::Debug
+        + std::cmp::Ord,
 {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        Self(std::sync::Arc::new(DashMap::with_capacity(capacity)))
+        Self(std::sync::Arc::new(HashMap::with_capacity(capacity)))
     }
 
     fn pin(&self) -> Self::Handle {
@@ -20,7 +28,15 @@ where
 
 impl<K> CollectionHandle for Table<K>
 where
-    K: Send + From<u64> + Copy + 'static + std::hash::Hash + Eq + std::fmt::Debug,
+    K: Send
+        + Sync
+        + From<u64>
+        + Copy
+        + 'static
+        + std::hash::Hash
+        + Eq
+        + std::fmt::Debug
+        + std::cmp::Ord,
 {
     type Key = K;
 
@@ -29,15 +45,15 @@ where
     }
 
     fn insert(&mut self, key: &Self::Key) -> bool {
-        !self.0.insert(*key, ())
+        self.0.insert(*key, ()).is_none()
     }
 
     fn remove(&mut self, key: &Self::Key) -> bool {
-        self.0.remove(key)
+        self.0.remove(key).is_some()
     }
 
     fn update(&mut self, key: &Self::Key) -> bool {
-        self.0.update(key, |_k, _v| ())
+        self.0.modify_entry(*key, |_k, _v| ()).is_some()
     }
 }
 

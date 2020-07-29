@@ -26,6 +26,7 @@ num_cpus = "1"
 dashmap = "3.11.7"
 dashmapv4 = { package = "dashmap", version = "4.0.0-rc6" }
 flurry = "0.3"
+cht = "0.4"
 
 [[bench]]
 name = "arc_mutex_std"
@@ -45,4 +46,8 @@ harness = false
 
 [[bench]]
 name = "flurry"
+harness = false
+
+[[bench]]
+name = "cht"
 harness = false

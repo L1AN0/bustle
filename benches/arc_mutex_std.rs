@@ -53,7 +53,12 @@ where
 
 fn main() {
     tracing_subscriber::fmt::init();
+    println!("read heavy");
     for n in (1..=num_cpus::get()).step_by(num_cpus::get() / 4) {
         Workload::new(n, Mix::read_heavy()).run::<Table<u64>>();
+    }
+    println!("uniform");
+    for n in (1..=num_cpus::get()).step_by(num_cpus::get() / 4) {
+        Workload::new(n, Mix::uniform()).run::<Table<u64>>();
     }
 }
