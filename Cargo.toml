@@ -9,7 +9,7 @@ readme = "README.md"
 description = "Benchmarking harness for concurrent key-value collections"
 repository = "https://github.com/jonhoo/bustle.git"
 
-keywords = ["concurrent","benchmark","harness"]
+keywords = ["concurrent", "benchmark", "harness"]
 categories = ["concurrency", "development-tools::profiling", "development-tools::testing"]
 
 [badges]
@@ -23,10 +23,14 @@ tracing = { version = "0.1", features = ["std"], default-features = false }
 [dev-dependencies]
 tracing-subscriber = "0.2"
 num_cpus = "1"
-dashmap = "3.11.7"
+dashmap = { version = "=3.11.8", features = ["no_std"] }
 dashmapv4 = { package = "dashmap", version = "4.0.0-rc6" }
 flurry = "0.3"
 cht = "0.4"
+contrie = "0.1"
+fnv = "1.0"
+intmap = "0.7"
+ahash = "0.4"
 
 [[bench]]
 name = "arc_mutex_std"
@@ -50,4 +54,20 @@ harness = false
 
 [[bench]]
 name = "cht"
+harness = false
+
+[[bench]]
+name = "cht_segmented"
+harness = false
+
+[[bench]]
+name = "contrie_clonemap"
+harness = false
+
+[[bench]]
+name = "contrie"
+harness = false
+
+[[bench]]
+name = "rwlock_intmap"
 harness = false

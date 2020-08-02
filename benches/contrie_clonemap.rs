@@ -1,18 +1,26 @@
-use ahash::RandomState;
 use bustle::*;
-use dashmap::DashMap;
+use contrie::CloneConMap;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<DashMap<K, (), RandomState>>);
+struct Table<K: Clone + std::hash::Hash + std::cmp::Eq + 'static>(
+    std::sync::Arc<CloneConMap<K, ()>>,
+);
 
 impl<K> Collection for Table<K>
 where
-    K: Send + Sync + From<u64> + Copy + 'static + std::hash::Hash + Eq + std::fmt::Debug,
+    K: Send
+        + Sync
+        + From<u64>
+        + Copy
+        + 'static
+        + std::hash::Hash
+        + Eq
+        + std::fmt::Debug
+        + std::cmp::Ord,
 {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        let map = DashMap::with_capacity_and_hasher(capacity, RandomState::default());
-        Self(std::sync::Arc::new(map))
+        Self(std::sync::Arc::new(CloneConMap::new()))
     }
 
     fn pin(&self) -> Self::Handle {
@@ -22,7 +30,15 @@ where
 
 impl<K> CollectionHandle for Table<K>
 where
-    K: Send + From<u64> + Copy + 'static + std::hash::Hash + Eq,
+    K: Send
+        + Sync
+        + From<u64>
+        + Copy
+        + 'static
+        + std::hash::Hash
+        + Eq
+        + std::fmt::Debug
+        + std::cmp::Ord,
 {
     type Key = K;
 
@@ -39,10 +55,8 @@ where
     }
 
     fn update(&mut self, key: &Self::Key) -> bool {
-        use dashmap::mapref::entry::Entry;
-        if let Entry::Occupied(mut e) = self.0.entry(*key) {
-            e.insert(());
-            true
+        if self.0.get(key).is_some() {
+            self.0.insert(*key, ()).is_some()
         } else {
             false
         }

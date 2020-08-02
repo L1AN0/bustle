@@ -1,8 +1,10 @@
+use ahash::RandomState;
 use bustle::*;
 use cht::HashMap;
+use fnv::FnvBuildHasher;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<HashMap<K, ()>>);
+struct Table<K>(std::sync::Arc<HashMap<K, (), RandomState>>);
 
 impl<K> Collection for Table<K>
 where
@@ -18,7 +20,10 @@ where
 {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        Self(std::sync::Arc::new(HashMap::with_capacity(capacity)))
+        Self(std::sync::Arc::new(HashMap::with_capacity_and_hasher(
+            capacity,
+            RandomState::default(),
+        )))
     }
 
     fn pin(&self) -> Self::Handle {
@@ -60,11 +65,11 @@ where
 fn main() {
     tracing_subscriber::fmt::init();
     println!("read heavy");
-    for n in (1..=num_cpus::get()).step_by(num_cpus::get() / 4) {
+    for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
         Workload::new(n, Mix::read_heavy()).run::<Table<u64>>();
     }
     println!("uniform");
-    for n in (1..=num_cpus::get()).step_by(num_cpus::get() / 4) {
+    for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
         Workload::new(n, Mix::uniform()).run::<Table<u64>>();
     }
 }
