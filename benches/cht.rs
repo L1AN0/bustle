@@ -64,6 +64,20 @@ where
 
 fn main() {
     tracing_subscriber::fmt::init();
+    println!("embedding server");
+    for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
+        Workload::new(
+            n,
+            Mix {
+                read: 90,
+                insert: 10,
+                remove: 0,
+                update: 0,
+                upsert: 0,
+            },
+        )
+        .run::<Table<u64>>();
+    }
     println!("read heavy");
     for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
         Workload::new(n, Mix::read_heavy()).run::<Table<u64>>();

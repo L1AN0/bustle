@@ -27,6 +27,7 @@ dashmap = { version = "=3.11.8", features = ["no_std"] }
 dashmapv4 = { package = "dashmap", version = "4.0.0-rc6" }
 flurry = "0.3"
 cht = "0.4"
+cht1 = { package = "cht", version = "=0.1.2" }
 contrie = "0.1"
 fnv = "1.0"
 intmap = "0.7"
@@ -54,6 +55,10 @@ harness = false
 
 [[bench]]
 name = "cht"
+harness = false
+
+[[bench]]
+name = "cht1"
 harness = false
 
 [[bench]]

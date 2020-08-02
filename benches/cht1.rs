@@ -1,18 +1,13 @@
-use ahash::RandomState;
 use bustle::*;
-use dashmap::DashMap;
+use cht1::HashMap;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<DashMap<K, (), RandomState>>);
+struct Table(std::sync::Arc<HashMap<u64, ()>>);
 
-impl<K> Collection for Table<K>
-where
-    K: Send + Sync + From<u64> + Copy + 'static + std::hash::Hash + Eq + std::fmt::Debug,
-{
+impl Collection for Table {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        let map = DashMap::with_capacity_and_hasher(capacity, RandomState::default());
-        Self(std::sync::Arc::new(map))
+        Self(std::sync::Arc::new(HashMap::with_capacity(capacity)))
     }
 
     fn pin(&self) -> Self::Handle {
@@ -20,11 +15,8 @@ where
     }
 }
 
-impl<K> CollectionHandle for Table<K>
-where
-    K: Send + From<u64> + Copy + 'static + std::hash::Hash + Eq,
-{
-    type Key = K;
+impl CollectionHandle for Table {
+    type Key = u64;
 
     fn get(&mut self, key: &Self::Key) -> bool {
         self.0.get(key).is_some()
@@ -39,13 +31,7 @@ where
     }
 
     fn update(&mut self, key: &Self::Key) -> bool {
-        use dashmap::mapref::entry::Entry;
-        if let Entry::Occupied(mut e) = self.0.entry(*key) {
-            e.insert(());
-            true
-        } else {
-            false
-        }
+        self.0.insert_entry(*key, ()).is_some()
     }
 }
 
@@ -63,14 +49,14 @@ fn main() {
                 upsert: 0,
             },
         )
-        .run::<Table<u64>>();
+        .run::<Table>();
     }
     println!("read heavy");
     for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
-        Workload::new(n, Mix::read_heavy()).run::<Table<u64>>();
+        Workload::new(n, Mix::read_heavy()).run::<Table>();
     }
     println!("uniform");
     for n in (1..=2 * num_cpus::get()).step_by(num_cpus::get() / 4) {
-        Workload::new(n, Mix::uniform()).run::<Table<u64>>();
+        Workload::new(n, Mix::uniform()).run::<Table>();
     }
 }
