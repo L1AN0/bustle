@@ -23,7 +23,7 @@ tracing = { version = "0.1", features = ["std"], default-features = false }
 [dev-dependencies]
 tracing-subscriber = "0.2"
 num_cpus = "1"
-dashmap = { version = "=3.11.8", features = ["no_std"] }
+dashmap = { version = "=3.11.10", features = ["no_std"] }
 dashmapv4 = { package = "dashmap", version = "4.0.0-rc6" }
 flurry = "0.3"
 cht = "0.4"
