@@ -32,9 +32,16 @@ contrie = "0.1"
 fnv = "1.0"
 intmap = "0.7"
 ahash = "0.4"
+shard_lock = { git = "https://github.com/L1AN0/shard_lock.git" }
+parking_lot = "0.11"
+hashbrown = "0.8"
 
 [[bench]]
 name = "arc_mutex_std"
+harness = false
+
+[[bench]]
+name = "shard_lock"
 harness = false
 
 [[bench]]
