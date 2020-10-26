@@ -1,9 +1,9 @@
 use bustle::*;
-use sharded::{Map, ShardLock};
+use persia_sharded::Sharded;
 use std::sync::Arc;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<Map<K, Arc<()>>>);
+struct Table<K>(std::sync::Arc<Sharded<hashbrown::HashMap<K, Arc<()>>, K>>);
 
 impl<K> Collection for Table<K>
 where
@@ -11,7 +11,14 @@ where
 {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        Self(std::sync::Arc::new(Map::with_capacity(capacity)))
+        let mut inner = vec![hashbrown::HashMap::with_capacity(capacity / 128); 128];
+        Self(std::sync::Arc::new(Sharded {
+            inner: inner
+                .into_iter()
+                .map(|x| parking_lot::RwLock::new(x))
+                .collect(),
+            phantom: std::marker::PhantomData::default(),
+        }))
     }
 
     fn pin(&self) -> Self::Handle {
@@ -26,20 +33,25 @@ where
     type Key = K;
 
     fn get(&mut self, key: &Self::Key) -> bool {
-        self.0.read(key).get(key).cloned().is_some()
+        self.0.index(key).read().get(key).cloned().is_some()
     }
 
     fn insert(&mut self, key: &Self::Key) -> bool {
-        !self.0.write(key).insert(*key, Arc::new(())).is_some()
+        !self
+            .0
+            .index(key)
+            .write()
+            .insert(*key, Arc::new(()))
+            .is_some()
     }
 
     fn remove(&mut self, key: &Self::Key) -> bool {
-        self.0.write(key).remove(key).is_some()
+        self.0.index(key).write().remove(key).is_some()
     }
 
     fn update(&mut self, key: &Self::Key) -> bool {
-        use hashbrown08::hash_map::Entry;
-        let mut map = self.0.write(key);
+        use hashbrown::hash_map::Entry;
+        let mut map = self.0.index(key).write();
         if let Entry::Occupied(mut e) = map.entry(*key) {
             e.insert(Arc::new(()));
             true
