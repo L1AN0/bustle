@@ -57,6 +57,10 @@ name = "persia_sharded"
 harness = false
 
 [[bench]]
+name = "persia_sharded_lru"
+harness = false
+
+[[bench]]
 name = "arc_rwlock_std"
 harness = false
 
