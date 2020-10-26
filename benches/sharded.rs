@@ -1,8 +1,9 @@
 use bustle::*;
 use sharded::{Map, ShardLock};
+use std::sync::Arc;
 
 #[derive(Clone)]
-struct Table<K>(std::sync::Arc<Map<K, ()>>);
+struct Table<K>(std::sync::Arc<Map<K, Arc<()>>>);
 
 impl<K> Collection for Table<K>
 where
@@ -25,11 +26,11 @@ where
     type Key = K;
 
     fn get(&mut self, key: &Self::Key) -> bool {
-        self.0.read(key).get(key).is_some()
+        self.0.read(key).get(key).cloned().is_some()
     }
 
     fn insert(&mut self, key: &Self::Key) -> bool {
-        !self.0.write(key).insert(*key, ()).is_some()
+        !self.0.write(key).insert(*key, Arc::new(())).is_some()
     }
 
     fn remove(&mut self, key: &Self::Key) -> bool {
@@ -40,7 +41,7 @@ where
         use hashbrown::hash_map::Entry;
         let mut map = self.0.write(key);
         if let Entry::Occupied(mut e) = map.entry(*key) {
-            e.insert(());
+            e.insert(Arc::new(()));
             true
         } else {
             false

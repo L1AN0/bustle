@@ -33,7 +33,7 @@ fnv = "1.0"
 intmap = "0.7"
 ahash = "0.4"
 shard_lock = { git = "https://github.com/L1AN0/shard_lock.git" }
-sharded = { version = "0.0.5", features = ["parking_lot", "hashbrown", "ahash"] }
+sharded = { version = "0.0.6", features = ["parking_lot", "hashbrown", "ahash"] }
 parking_lot = "0.11"
 hashbrown = "0.8"
 
