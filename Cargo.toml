@@ -37,6 +37,7 @@ sharded = { version = "0.0.6", features = ["parking_lot", "hashbrown", "ahash"] 
 persia-sharded = { git = "https://github.com/NOBLES5E/persia-sharded.git" }
 parking_lot = "0.11"
 lru_time_cache = "0.11"
+lru-cache = "0.1"
 hashbrown = { version = "0.9", features = ["inline-more", "ahash"] }
 hashbrown08 = { package = "hashbrown", version = "0.8", features = ["inline-more", "ahash"] }
 
@@ -58,6 +59,10 @@ harness = false
 
 [[bench]]
 name = "persia_sharded_lru"
+harness = false
+
+[[bench]]
+name = "persia_sharded_lru2"
 harness = false
 
 [[bench]]
