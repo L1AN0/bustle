@@ -4,12 +4,12 @@ use persia_sharded::Sharded;
 use std::sync::Arc;
 
 #[derive(Clone)]
-struct Table(std::sync::Arc<Sharded<hashlink::LinkedHashMap<u64, Arc<()>>, u64>>);
+struct Table(std::sync::Arc<Sharded<hashlink::LruCache<u64, Arc<()>>, u64>>);
 
 impl Collection for Table {
     type Handle = Self;
     fn with_capacity(capacity: usize) -> Self {
-        let mut inner = vec![hashlink::LinkedHashMap::with_capacity(capacity / 128); 128];
+        let mut inner = vec![hashlink::LruCache::new(capacity / 128); 128];
         Self(std::sync::Arc::new(Sharded {
             inner: inner
                 .into_iter()
@@ -31,10 +31,7 @@ impl CollectionHandle for Table {
         let mut entry = self.0.index(key).write();
         let mut entry = entry.raw_entry_mut().from_key(key);
         match entry {
-            RawEntryMut::Occupied(ref mut x) => {
-                x.to_back();
-                true
-            }
+            RawEntryMut::Occupied(ref mut x) => true,
             RawEntryMut::Vacant(_) => false,
         }
     }
