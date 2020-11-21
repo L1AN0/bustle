@@ -39,6 +39,7 @@ parking_lot = "0.11"
 lru_time_cache = "0.11"
 lru-cache = "0.1"
 hashlink = "0.6"
+griddle = "0.3.2"
 hashbrown = { version = "0.9", features = ["inline-more", "ahash"] }
 hashbrown08 = { package = "hashbrown", version = "0.8", features = ["inline-more", "ahash"] }
 
@@ -56,6 +57,10 @@ harness = false
 
 [[bench]]
 name = "persia_sharded"
+harness = false
+
+[[bench]]
+name = "persia_sharded_griddle"
 harness = false
 
 [[bench]]
